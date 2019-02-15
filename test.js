@@ -1,16 +1,15 @@
-const assert = require('assert')
-const path = require('path')
-const fs = require('fs')
-const stripIndent = require('strip-indent')
-const plugin = require('./')
+const assert = require("assert")
+const path = require("path")
+const fs = require("fs")
+const stripIndent = require("strip-indent")
+const plugin = require("./")
 
 const cleanup = str => stripIndent(str).trim()
 
-describe('styled-jsx-plugin-sass', () => {
-
-  it('applies plugins', () => {
+describe("styled-jsx-plugin-sass", () => {
+  it("applies plugins", () => {
     assert.equal(
-      plugin('p { img { display: block} color: color(red a(90%)) }', {}).trim(),
+      plugin("p { img { display: block} color: color(red a(90%)) }", {}).trim(),
       cleanup(`
         p {
           color: color(red a(90%)); }
@@ -22,7 +21,7 @@ describe('styled-jsx-plugin-sass', () => {
 
   it("does not add space after variable placeholder", () => {
     assert.equal(
-      plugin('p { img { color: %%styled-jsx-placeholder-0%%px; } }', {}).trim(),
+      plugin("p { img { color: %%styled-jsx-placeholder-0%%px; } }", {}).trim(),
       cleanup(`
         p img {
           color: %%styled-jsx-placeholder-0%%px; }
@@ -30,9 +29,25 @@ describe('styled-jsx-plugin-sass', () => {
     )
   })
 
+  it("works with nesting", () => {
+    assert.equal(
+      plugin(
+        "%%styled-jsx-placeholder-0%% { img { color: %%styled-jsx-placeholder-0%%px; } }",
+        {}
+      ).trim(),
+      cleanup(`
+      %%styled-jsx-placeholder-0%% img {
+        color: %%styled-jsx-placeholder-0%%px; }
+      `)
+    )
+  })
+
   it("works with placeholders in css functions", () => {
     assert.equal(
-      plugin('div { grid-template-columns: repeat(%%styled-jsx-placeholder-0%%, calc(%%styled-jsx-placeholder-1%%% - %%styled-jsx-placeholder-2%%px)); }', {}).trim(),
+      plugin(
+        "div { grid-template-columns: repeat(%%styled-jsx-placeholder-0%%, calc(%%styled-jsx-placeholder-1%%% - %%styled-jsx-placeholder-2%%px)); }",
+        {}
+      ).trim(),
       cleanup(`
         div {
           grid-template-columns: repeat(%%styled-jsx-placeholder-0%%, calc(%%styled-jsx-placeholder-1%%% - %%styled-jsx-placeholder-2%%px)); }
@@ -40,9 +55,10 @@ describe('styled-jsx-plugin-sass', () => {
     )
   })
 
-  it('works with placeholders', () => {
+  it("works with placeholders", () => {
     assert.equal(
-      plugin(`
+      plugin(
+        `
         p { 
           img { display: block } color: %%styled-jsx-placeholder-0%%; border-bottom: 1px solid %%styled-jsx-placeholder-1%%; 
           em { color: %%styled-jsx-placeholder-2%% !important; }
@@ -64,9 +80,10 @@ describe('styled-jsx-plugin-sass', () => {
     )
   })
 
-  it('works with media queries placeholders', () => {
+  it("works with media queries placeholders", () => {
     assert.equal(
-      plugin(`
+      plugin(
+        `
         p {
           display: block;
           @media %%styled-jsx-placeholder-0%% { color: red; }
@@ -91,9 +108,9 @@ describe('styled-jsx-plugin-sass', () => {
     )
   })
 
-  it('works with selectors placeholders', () => {
+  it("works with selectors placeholders", () => {
     assert.equal(
-      plugin('p { display: block; %%styled-jsx-placeholder-0%% { color: red; } }', {}).trim(),
+      plugin("p { display: block; %%styled-jsx-placeholder-0%% { color: red; } }", {}).trim(),
       cleanup(`
         p {
           display: block; }
@@ -103,7 +120,7 @@ describe('styled-jsx-plugin-sass', () => {
     )
   })
 
-  it('works with @import', () => {
+  it("works with @import", () => {
     assert.equal(
       plugin('@import "fixtures/fixture"; p { color: red }', {}).trim(),
       cleanup(`
@@ -116,14 +133,14 @@ describe('styled-jsx-plugin-sass', () => {
     )
   })
 
-  it('works with relative @import', () => {
-    const filename = 'fixtures/entry.scss'
+  it("works with relative @import", () => {
+    const filename = "fixtures/entry.scss"
     const file = fs.readFileSync(path.join(__dirname, filename))
 
     assert.equal(
       plugin(file.toString(), {
         sassOptions: {
-          includePaths: [path.join(__dirname, 'fixtures')]
+          includePaths: [path.join(__dirname, "fixtures")]
         },
         babel: { filename }
       }).trim(),
@@ -135,11 +152,11 @@ describe('styled-jsx-plugin-sass', () => {
           color: red; }
       `)
     )
-  });
+  })
 
-  it('applies sassOptions', () => {
+  it("applies sassOptions", () => {
     assert.equal(
-      plugin('div { padding: (1 / 3) * 1em }', {
+      plugin("div { padding: (1 / 3) * 1em }", {
         sassOptions: {
           precision: 1
         }
